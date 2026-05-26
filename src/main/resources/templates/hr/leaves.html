@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Leave Approvals – PeopleInfo</title>
+<link rel="stylesheet" th:href="@{/css/style.css}"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+</head>
+<body>
+<div class="app-layout">
+  <div th:replace="~{fragments/sidebar :: hr-sidebar}"></div>
+  <div class="main-content">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Leave Approvals</div>
+        <div class="page-subtitle">Review and manage leave requests</div>
+      </div>
+      <div class="topbar-actions">
+        <a th:href="@{/hr/leaves}" th:class="${statusFilter == null} ? 'btn btn-primary' : 'btn btn-outline'">All</a>
+        <a th:href="@{/hr/leaves(status='PENDING')}" th:class="${statusFilter == 'PENDING'} ? 'btn btn-warning' : 'btn btn-outline'">Pending</a>
+        <a th:href="@{/hr/leaves(status='APPROVED')}" th:class="${statusFilter == 'APPROVED'} ? 'btn btn-success' : 'btn btn-outline'">Approved</a>
+        <a th:href="@{/hr/leaves(status='REJECTED')}" th:class="${statusFilter == 'REJECTED'} ? 'btn btn-danger' : 'btn btn-outline'">Rejected</a>
+      </div>
+    </div>
+
+    <div class="page-body">
+      <div th:if="${success}" class="alert alert-success"><i class="ri-checkbox-circle-line"></i> <span th:text="${success}"></span></div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Leave Requests</span>
+          <span class="badge badge-primary" th:text="${leaves.size()} + ' records'"></span>
+        </div>
+        <div th:if="${#lists.isEmpty(leaves)}">
+          <div class="empty-state"><i class="ri-calendar-check-line"></i><p>No leave requests found.</p></div>
+        </div>
+        <div class="table-wrap" th:if="${!#lists.isEmpty(leaves)}">
+          <table>
+            <thead><tr>
+              <th>Employee</th><th>Leave Type</th><th>From</th><th>To</th>
+              <th>Days</th><th>Reason</th><th>Status</th><th>Applied On</th><th>Actions</th>
+            </tr></thead>
+            <tbody>
+              <tr th:each="leave : ${leaves}">
+                <td>
+                  <div style="display:flex;align-items:center;gap:.6rem;">
+                    <div class="user-avatar-sm" style="width:32px;height:32px;font-size:.75rem;"
+                         th:text="${leave.employee.firstName.substring(0,1)} + ${leave.employee.lastName.substring(0,1)}"></div>
+                    <div>
+                      <div style="font-weight:600;font-size:.875rem;" th:text="${leave.employee.fullName}"></div>
+                      <div class="text-sm text-muted" th:text="${leave.employee.department}"></div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="badge badge-info" th:text="${leave.leaveType}"></span></td>
+                <td class="text-sm" th:text="${leave.startDate}"></td>
+                <td class="text-sm" th:text="${leave.endDate}"></td>
+                <td><strong th:text="${leave.totalDays}"></strong></td>
+                <td class="text-sm text-muted" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                    th:text="${leave.reason} ?: '—'"></td>
+                <td>
+                  <span th:class="${leave.status.name() == 'APPROVED'} ? 'badge badge-success' :
+                                  (${leave.status.name() == 'REJECTED'} ? 'badge badge-danger' : 'badge badge-warning')"
+                        th:text="${leave.status}"></span>
+                </td>
+                <td class="text-sm text-muted"
+                    th:text="${leave.appliedOn != null ? leave.appliedOn.toLocalDate().toString() : '—'}"></td>
+                <td>
+                  <div th:if="${leave.status.name() == 'PENDING'}" style="display:flex;gap:.4rem;">
+                    <button class="btn btn-success btn-sm"
+                            th:onclick="'setLeaveAction(' + ${leave.id} + ', \'approve\')'">
+                      <i class="ri-check-line"></i> Approve
+                    </button>
+                    <button class="btn btn-danger btn-sm"
+                            th:onclick="'setLeaveAction(' + ${leave.id} + ', \'reject\')'">
+                      <i class="ri-close-line"></i> Reject
+                    </button>
+                  </div>
+                  <div th:if="${leave.status.name() != 'PENDING'}" class="text-sm text-muted">
+                    <div th:if="${leave.approvedBy != null}" th:text="'By: ' + ${leave.approvedBy.fullName}"></div>
+                    <div th:if="${leave.hrComments != null}" style="font-style:italic;" th:text="${leave.hrComments}"></div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Leave Action Modal -->
+<div class="modal-overlay" id="leaveActionModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="leaveActionTitle">Leave Action</span>
+      <button class="btn btn-outline btn-sm btn-icon" onclick="closeModal('leaveActionModal')">
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="leaveId"/>
+      <input type="hidden" id="leaveAction"/>
+      <div class="form-group">
+        <label class="form-label">Comments (optional)</label>
+        <textarea id="leaveComments" class="form-control" rows="3" placeholder="Add a note to the employee..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('leaveActionModal')">Cancel</button>
+      <button id="leaveSubmitBtn" class="btn btn-success" onclick="submitLeaveAction()">Approve</button>
+    </div>
+  </div>
+</div>
+
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

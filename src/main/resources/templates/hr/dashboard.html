@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HR Dashboard – PeopleInfo</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+  <div class="app-layout">
+    <div th:replace="~{fragments/sidebar :: hr-sidebar}"></div>
+
+    <div class="main-content">
+      <!-- Topbar -->
+      <div class="topbar">
+        <div>
+          <div class="page-title">Dashboard</div>
+          <div class="page-subtitle" th:text="'Welcome back, ' + ${currentUser?.firstName} + '!'"></div>
+        </div>
+        <div class="topbar-actions">
+          <a th:href="@{/hr/employees/new}" class="btn btn-primary">
+            <i class="ri-user-add-line"></i> Add Employee
+          </a>
+        </div>
+      </div>
+
+      <div class="page-body">
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="alert alert-success">
+          <i class="ri-checkbox-circle-line"></i> <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="alert alert-danger">
+          <i class="ri-error-warning-line"></i> <span th:text="${error}"></span>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon blue"><i class="ri-group-line"></i></div>
+            <div class="stat-info">
+              <div class="label">Total Employees</div>
+              <div class="value" th:text="${totalEmployees}">0</div>
+              <div class="change">Active workforce</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon yellow"><i class="ri-calendar-check-line"></i></div>
+            <div class="stat-info">
+              <div class="label">Pending Leaves</div>
+              <div class="value" th:text="${pendingLeaves}">0</div>
+              <div class="change">Awaiting approval</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon purple"><i class="ri-time-line"></i></div>
+            <div class="stat-info">
+              <div class="label">Pending Timesheets</div>
+              <div class="value" th:text="${pendingTimesheets}">0</div>
+              <div class="change">To review</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green"><i class="ri-briefcase-line"></i></div>
+            <div class="stat-info">
+              <div class="label">Open Positions</div>
+              <div class="value" th:text="${openJobs}">0</div>
+              <div class="change">Actively hiring</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+          <!-- Pending Leave Requests -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title"><i class="ri-calendar-check-line" style="color:var(--warning);"></i> Pending
+                Leave Requests</span>
+              <a th:href="@{/hr/leaves}" class="btn btn-outline btn-sm">View All</a>
+            </div>
+            <div th:if="${#lists.isEmpty(recentLeaves)}">
+              <div class="empty-state" style="padding:2rem;">
+                <i class="ri-checkbox-circle-line" style="color:var(--success);"></i>
+                <p>No pending leave requests</p>
+              </div>
+            </div>
+            <div class="table-wrap" th:if="${!#lists.isEmpty(recentLeaves)}">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Employee</th>
+                    <th>Type</th>
+                    <th>Dates</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="leave : ${recentLeaves}">
+                    <td>
+                      <div style="font-weight:600;" th:text="${leave.employee.fullName}"></div>
+                      <div class="text-sm text-muted" th:text="${leave.employee.department}"></div>
+                    </td>
+                    <td><span class="badge badge-info" th:text="${leave.leaveType}"></span></td>
+                    <td>
+                      <div class="text-sm" th:text="${leave.startDate}"></div>
+                      <div class="text-sm text-muted" th:text="${leave.totalDays} + ' day(s)'"></div>
+                    </td>
+                    <td>
+                      <button class="btn btn-success btn-sm"
+                        th:onclick="'setLeaveAction(' + ${leave.id} + ', \'approve\')'">
+                        <i class="ri-check-line"></i>
+                      </button>
+                      <button class="btn btn-danger btn-sm"
+                        th:onclick="'setLeaveAction(' + ${leave.id} + ', \'reject\')'">
+                        <i class="ri-close-line"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Recent Employees -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title"><i class="ri-group-line" style="color:var(--primary);"></i> Recent
+                Employees</span>
+              <a th:href="@{/hr/employees}" class="btn btn-outline btn-sm">View All</a>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Employee</th>
+                    <th>Department</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="emp, iStat : ${allEmployees}" th:if="${iStat.index < 6}">
+                    <td>
+                      <div style="display:flex;align-items:center;gap:.6rem;">
+                        <div class="user-avatar-sm" style="width:32px;height:32px;font-size:.75rem;"
+                          th:text="${emp.firstName.substring(0,1)} + ${emp.lastName.substring(0,1)}"></div>
+                        <div>
+                          <div style="font-weight:600;font-size:.85rem;" th:text="${emp.fullName}"></div>
+                          <div class="text-sm text-muted" th:text="${emp.position}"></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="text-sm" th:text="${emp.department}"></td>
+                    <td>
+                      <span
+                        th:class="${emp.status?.name() == 'ACTIVE'} ? 'badge badge-success' : 'badge badge-secondary'"
+                        th:text="${emp.status}"></span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leave Action Modal -->
+  <div class="modal-overlay" id="leaveActionModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title" id="leaveActionTitle">Leave Action</span>
+        <button class="btn btn-outline btn-sm btn-icon" onclick="closeModal('leaveActionModal')">
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="leaveId" />
+        <input type="hidden" id="leaveAction" />
+        <div class="form-group">
+          <label class="form-label">Comments (optional)</label>
+          <textarea id="leaveComments" class="form-control" rows="3" placeholder="Add any comments..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('leaveActionModal')">Cancel</button>
+        <button id="leaveSubmitBtn" class="btn btn-success" onclick="submitLeaveAction()">Approve</button>
+      </div>
+    </div>
+  </div>
+
+  <script th:src="@{/js/app.js}"></script>
+</body>
+
+</html>

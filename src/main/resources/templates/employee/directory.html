@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Employee Directory – PeopleInfo</title>
+<link rel="stylesheet" th:href="@{/css/style.css}"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+</head>
+<body>
+<div class="app-layout">
+  <div th:replace="~{fragments/sidebar :: emp-sidebar}"></div>
+  <div class="main-content">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Employee Directory</div>
+        <div class="page-subtitle">Meet your colleagues</div>
+      </div>
+      <div class="topbar-actions">
+        <form th:action="@{/employee/directory}" method="GET" style="display:flex;gap:.5rem;">
+          <div class="search-bar">
+            <i class="ri-search-line"></i>
+            <input type="text" name="search" class="form-control" placeholder="Search by name or email..."
+                   th:value="${search}" style="width:260px;"/>
+          </div>
+          <button type="submit" class="btn btn-primary"><i class="ri-search-line"></i></button>
+          <a th:if="${search}" th:href="@{/employee/directory}" class="btn btn-outline">Clear</a>
+        </form>
+      </div>
+    </div>
+
+    <div class="page-body">
+      <div th:if="${#lists.isEmpty(employees)}">
+        <div class="card">
+          <div class="empty-state" style="padding:3rem;">
+            <i class="ri-group-line"></i><p>No employees found.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="employee-grid" th:if="${!#lists.isEmpty(employees)}">
+        <div class="employee-card" th:each="emp : ${employees}">
+          <div class="emp-avatar"
+               th:style="${emp.role.name() == 'HR'} ? 'background:var(--info)' : 'background:var(--primary)'"
+               th:text="${emp.firstName.substring(0,1)} + ${emp.lastName.substring(0,1)}"></div>
+          <div class="emp-name" th:text="${emp.fullName}"></div>
+          <div class="emp-role" th:text="${emp.position} ?: 'Employee'"></div>
+          <div class="emp-dept" th:if="${emp.department}" th:text="${emp.department}"></div>
+          <div class="emp-meta">
+            <span th:class="${emp.role.name() == 'HR'} ? 'badge role-hr' : 'badge badge-primary'"
+                  th:text="${emp.role}"></span>
+            <span th:class="${emp.status?.name() == 'ACTIVE'} ? 'badge badge-success' : 'badge badge-secondary'"
+                  th:text="${emp.status}"></span>
+          </div>
+          <div style="margin-top:1rem;padding-top:.75rem;border-top:1px solid var(--border);font-size:.78rem;color:var(--text3);text-align:left;">
+            <div th:if="${emp.email}"><i class="ri-mail-line"></i> <span th:text="${emp.email}"></span></div>
+            <div th:if="${emp.phone}" style="margin-top:.2rem;"><i class="ri-phone-line"></i> <span th:text="${emp.phone}"></span></div>
+            <div th:if="${emp.dateOfJoining}" style="margin-top:.2rem;">
+              <i class="ri-calendar-line"></i> Joined <span th:text="${emp.dateOfJoining}"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div th:if="${!#lists.isEmpty(employees)}" style="margin-top:1rem;text-align:center;color:var(--text3);font-size:.82rem;">
+        Showing <strong th:text="${employees.size()}"></strong> employee(s)
+        <span th:if="${search}"> matching "<em th:text="${search}"></em>"</span>
+      </div>
+    </div>
+  </div>
+</div>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

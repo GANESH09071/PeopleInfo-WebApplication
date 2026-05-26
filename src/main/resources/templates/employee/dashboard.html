@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Dashboard – PeopleInfo</title>
+<link rel="stylesheet" th:href="@{/css/style.css}"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+</head>
+<body>
+<div class="app-layout">
+  <div th:replace="~{fragments/sidebar :: emp-sidebar}"></div>
+  <div class="main-content">
+    <div class="topbar">
+      <div>
+        <div class="page-title">My Dashboard</div>
+        <div class="page-subtitle" th:text="'Welcome, ' + ${currentUser?.firstName} + '! Here\'s your overview.'"></div>
+      </div>
+      <div class="topbar-actions">
+        <a th:href="@{/employee/timesheets}" class="btn btn-primary">
+          <i class="ri-add-line"></i> Log Time
+        </a>
+      </div>
+    </div>
+
+    <div class="page-body">
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="ri-time-line"></i></div>
+          <div class="stat-info">
+            <div class="label">Hours This Month</div>
+            <div class="value" th:text="${hoursThisMonth} + 'h'">0h</div>
+            <div class="change">Logged so far</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon yellow"><i class="ri-calendar-event-line"></i></div>
+          <div class="stat-info">
+            <div class="label">My Leave Requests</div>
+            <div class="value" th:text="${myLeaves.size()}">0</div>
+            <div class="change">Total submitted</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="ri-group-line"></i></div>
+          <div class="stat-info">
+            <div class="label">Total Employees</div>
+            <div class="value" th:text="${totalEmployees}">0</div>
+            <div class="change">In the company</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon purple"><i class="ri-briefcase-line"></i></div>
+          <div class="stat-info">
+            <div class="label">Open Positions</div>
+            <div class="value" th:text="${openJobs}">0</div>
+            <div class="change">Actively hiring</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile + Quick Info -->
+      <div style="display:grid;grid-template-columns:300px 1fr;gap:1.5rem;margin-bottom:1.5rem;">
+        <div class="card">
+          <div class="card-body" style="text-align:center;padding:2rem 1.5rem;">
+            <div class="emp-avatar" style="width:80px;height:80px;font-size:2rem;"
+                 th:text="${currentUser.firstName.substring(0,1)} + ${currentUser.lastName.substring(0,1)}"></div>
+            <div style="font-weight:700;font-size:1.1rem;margin-bottom:.25rem;" th:text="${currentUser.fullName}"></div>
+            <div class="text-sm text-muted" th:text="${currentUser.position} ?: 'Employee'"></div>
+            <div style="margin-top:.75rem;">
+              <span class="badge badge-primary" th:text="${currentUser.department} ?: 'N/A'"></span>
+              <span class="badge badge-success" style="margin-left:.25rem;" th:text="${currentUser.status}"></span>
+            </div>
+            <div style="margin-top:1.5rem;text-align:left;font-size:.82rem;color:var(--text2);">
+              <div style="padding:.4rem 0;border-bottom:1px solid var(--border);">
+                <i class="ri-id-card-line"></i> <span th:text="${currentUser.employeeId}"></span>
+              </div>
+              <div style="padding:.4rem 0;border-bottom:1px solid var(--border);">
+                <i class="ri-mail-line"></i> <span th:text="${currentUser.email}"></span>
+              </div>
+              <div style="padding:.4rem 0;" th:if="${currentUser.phone}">
+                <i class="ri-phone-line"></i> <span th:text="${currentUser.phone}"></span>
+              </div>
+              <div style="padding:.4rem 0;" th:if="${currentUser.dateOfJoining}">
+                <i class="ri-calendar-line"></i> Joined <span th:text="${currentUser.dateOfJoining}"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Recent Leave Requests</span>
+            <a th:href="@{/employee/leaves}" class="btn btn-outline btn-sm">Apply Leave</a>
+          </div>
+          <div th:if="${#lists.isEmpty(myLeaves)}">
+            <div class="empty-state" style="padding:2rem;">
+              <i class="ri-calendar-event-line"></i>
+              <p>No leave requests submitted yet.</p>
+            </div>
+          </div>
+          <div class="table-wrap" th:if="${!#lists.isEmpty(myLeaves)}">
+            <table>
+              <thead><tr><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr th:each="leave, iStat : ${myLeaves}" th:if="${iStat.index < 5}">
+                  <td><span class="badge badge-info" th:text="${leave.leaveType}"></span></td>
+                  <td class="text-sm" th:text="${leave.startDate}"></td>
+                  <td class="text-sm" th:text="${leave.endDate}"></td>
+                  <td><strong th:text="${leave.totalDays}"></strong></td>
+                  <td>
+                    <span th:class="${leave.status.name() == 'APPROVED'} ? 'badge badge-success' :
+                                    (${leave.status.name() == 'REJECTED'} ? 'badge badge-danger' : 'badge badge-warning')"
+                          th:text="${leave.status}"></span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Timesheets -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Recent Timesheets</span>
+          <a th:href="@{/employee/timesheets}" class="btn btn-outline btn-sm">View All</a>
+        </div>
+        <div th:if="${#lists.isEmpty(myTimesheets)}">
+          <div class="empty-state" style="padding:2rem;">
+            <i class="ri-time-line"></i><p>No timesheet entries yet.</p>
+          </div>
+        </div>
+        <div class="table-wrap" th:if="${!#lists.isEmpty(myTimesheets)}">
+          <table>
+            <thead><tr><th>Date</th><th>Check In</th><th>Check Out</th><th>Hours</th><th>Project</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr th:each="ts, iStat : ${myTimesheets}" th:if="${iStat.index < 5}">
+                <td style="font-weight:500;" th:text="${ts.date}"></td>
+                <td th:text="${ts.checkIn}"></td>
+                <td th:text="${ts.checkOut}"></td>
+                <td><span style="font-weight:700;color:var(--primary);" th:text="${ts.hoursWorked} + 'h'"></span></td>
+                <td class="text-sm text-muted" th:text="${ts.projectName} ?: '—'"></td>
+                <td>
+                  <span th:class="${ts.status.name() == 'APPROVED'} ? 'badge badge-success' :
+                                  (${ts.status.name() == 'REJECTED'} ? 'badge badge-danger' : 'badge badge-warning')"
+                        th:text="${ts.status}"></span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

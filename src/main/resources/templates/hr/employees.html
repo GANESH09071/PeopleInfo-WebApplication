@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Employees – PeopleInfo</title>
+<link rel="stylesheet" th:href="@{/css/style.css}"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+</head>
+<body>
+<div class="app-layout">
+  <div th:replace="~{fragments/sidebar :: hr-sidebar}"></div>
+  <div class="main-content">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Employees</div>
+        <div class="page-subtitle">Manage your workforce</div>
+      </div>
+      <div class="topbar-actions">
+        <form th:action="@{/hr/employees}" method="GET" style="display:flex;gap:.5rem;">
+          <div class="search-bar">
+            <i class="ri-search-line"></i>
+            <input type="text" name="search" class="form-control" placeholder="Search employees..."
+                   th:value="${search}" style="width:240px;"/>
+          </div>
+          <button type="submit" class="btn btn-outline"><i class="ri-search-line"></i></button>
+        </form>
+        <a th:href="@{/hr/employees/new}" class="btn btn-primary">
+          <i class="ri-user-add-line"></i> Add Employee
+        </a>
+      </div>
+    </div>
+
+    <div class="page-body">
+      <div th:if="${success}" class="alert alert-success"><i class="ri-checkbox-circle-line"></i> <span th:text="${success}"></span></div>
+      <div th:if="${error}" class="alert alert-danger"><i class="ri-error-warning-line"></i> <span th:text="${error}"></span></div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">All Employees</span>
+          <span class="badge badge-primary" th:text="${employees.size()} + ' records'"></span>
+        </div>
+        <div th:if="${#lists.isEmpty(employees)}">
+          <div class="empty-state"><i class="ri-group-line"></i><p>No employees found.</p></div>
+        </div>
+        <div class="table-wrap" th:if="${!#lists.isEmpty(employees)}">
+          <table>
+            <thead><tr>
+              <th>Employee</th><th>ID</th><th>Department</th><th>Position</th>
+              <th>Role</th><th>Status</th><th>Joined</th><th>Actions</th>
+            </tr></thead>
+            <tbody>
+              <tr th:each="emp : ${employees}">
+                <td>
+                  <div style="display:flex;align-items:center;gap:.75rem;">
+                    <div class="user-avatar-sm"
+                         th:text="${emp.firstName.substring(0,1)} + ${emp.lastName.substring(0,1)}"></div>
+                    <div>
+                      <div style="font-weight:600;" th:text="${emp.fullName}"></div>
+                      <div class="text-sm text-muted" th:text="${emp.email}"></div>
+                    </div>
+                  </div>
+                </td>
+                <td><code style="font-size:.78rem;background:#f1f5f9;padding:.2rem .5rem;border-radius:4px;"
+                          th:text="${emp.employeeId}"></code></td>
+                <td th:text="${emp.department} ?: '—'"></td>
+                <td th:text="${emp.position} ?: '—'"></td>
+                <td>
+                  <span th:class="${emp.role?.name() == 'HR'} ? 'badge role-hr' : 'badge badge-primary'"
+                        th:text="${emp.role}"></span>
+                </td>
+                <td>
+                  <span th:class="${emp.status?.name() == 'ACTIVE'} ? 'badge badge-success' :
+                                  (${emp.status?.name() == 'ON_LEAVE'} ? 'badge badge-warning' : 'badge badge-secondary')"
+                        th:text="${emp.status}"></span>
+                </td>
+                <td class="text-sm text-muted" th:text="${emp.dateOfJoining} ?: '—'"></td>
+                <td>
+                  <div style="display:flex;gap:.4rem;">
+                    <a th:href="@{/hr/employees/{id}/edit(id=${emp.id})}" class="btn btn-outline btn-sm">
+                      <i class="ri-edit-line"></i>
+                    </a>
+                    <form th:id="'del-' + ${emp.id}" th:action="@{/hr/employees/{id}/delete(id=${emp.id})}" method="POST" style="display:inline;">
+                      <button type="button" class="btn btn-danger btn-sm"
+                              th:onclick="'confirmDelete(\'del-' + ${emp.id} + '\')'">
+                        <i class="ri-delete-bin-line"></i>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

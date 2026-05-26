@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Open Positions – PeopleInfo</title>
+<link rel="stylesheet" th:href="@{/css/style.css}"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+</head>
+<body>
+<div class="app-layout">
+  <div th:replace="~{fragments/sidebar :: emp-sidebar}"></div>
+  <div class="main-content">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Open Positions</div>
+        <div class="page-subtitle">Current hiring requirements at PeopleInfo</div>
+      </div>
+    </div>
+
+    <div class="page-body">
+      <div th:if="${#lists.isEmpty(jobs)}">
+        <div class="card">
+          <div class="empty-state" style="padding:3rem;">
+            <i class="ri-briefcase-line"></i>
+            <p>No open positions at the moment. Check back later!</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:1.25rem;" th:if="${!#lists.isEmpty(jobs)}">
+        <div class="card" th:each="job : ${jobs}">
+          <div class="card-header">
+            <div>
+              <div style="font-weight:700;font-size:1.1rem;" th:text="${job.jobTitle}"></div>
+              <div style="margin-top:.35rem;display:flex;gap:.5rem;flex-wrap:wrap;">
+                <span class="badge badge-info" th:if="${job.department}" th:text="${job.department}"></span>
+                <span class="badge badge-secondary" th:if="${job.jobType}" th:text="${job.jobType}"></span>
+                <span class="badge badge-primary" th:if="${job.experienceLevel}" th:text="${job.experienceLevel}"></span>
+                <span th:if="${job.positionsAvailable != null}" class="badge badge-success"
+                      th:text="${job.positionsAvailable} + ' opening(s)'"></span>
+              </div>
+            </div>
+            <div style="text-align:right;flex-shrink:0;">
+              <span class="badge badge-success" style="font-size:.75rem;">OPEN</span>
+              <div th:if="${job.salaryRangeMin != null}"
+                   style="margin-top:.4rem;font-size:.85rem;font-weight:700;color:var(--success);">
+                $<span th:text="${job.salaryRangeMin / 1000}"></span>K –
+                $<span th:text="${job.salaryRangeMax / 1000}"></span>K
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;">
+              <div>
+                <p style="color:var(--text2);line-height:1.7;margin-bottom:1rem;"
+                   th:text="${job.description}"></p>
+
+                <div th:if="${job.requirements != null and !#strings.isEmpty(job.requirements)}"
+                     style="margin-bottom:1rem;">
+                  <h4 style="font-size:.82rem;font-weight:700;text-transform:uppercase;
+                              letter-spacing:.5px;color:var(--text3);margin-bottom:.5rem;">
+                    Requirements
+                  </h4>
+                  <ul style="padding-left:1.25rem;color:var(--text2);font-size:.875rem;line-height:2;">
+                    <li th:each="req : ${#strings.arraySplit(job.requirements, '\n')}"
+                        th:if="${!#strings.isEmpty(#strings.trim(req))}"
+                        th:text="${#strings.trim(req)}"></li>
+                  </ul>
+                </div>
+
+                <div th:if="${job.responsibilities != null and !#strings.isEmpty(job.responsibilities)}">
+                  <h4 style="font-size:.82rem;font-weight:700;text-transform:uppercase;
+                              letter-spacing:.5px;color:var(--text3);margin-bottom:.5rem;">
+                    Responsibilities
+                  </h4>
+                  <ul style="padding-left:1.25rem;color:var(--text2);font-size:.875rem;line-height:2;">
+                    <li th:each="res : ${#strings.arraySplit(job.responsibilities, '\n')}"
+                        th:if="${!#strings.isEmpty(#strings.trim(res))}"
+                        th:text="${#strings.trim(res)}"></li>
+                  </ul>
+                </div>
+              </div>
+
+              <div style="background:var(--surface2);border-radius:var(--radius);
+                          padding:1.25rem;height:fit-content;">
+                <h4 style="font-size:.82rem;font-weight:700;text-transform:uppercase;
+                            letter-spacing:.5px;color:var(--text3);margin-bottom:.75rem;">
+                  Job Details
+                </h4>
+                <div style="font-size:.85rem;color:var(--text2);display:flex;flex-direction:column;gap:.6rem;">
+                  <div th:if="${job.location}">
+                    <i class="ri-map-pin-line" style="color:var(--primary);"></i>
+                    <strong> Location:</strong> <span th:text="${job.location}"></span>
+                  </div>
+                  <div th:if="${job.deadlineDate}">
+                    <i class="ri-calendar-line" style="color:var(--warning);"></i>
+                    <strong> Deadline:</strong> <span th:text="${job.deadlineDate}"></span>
+                  </div>
+                  <div th:if="${job.postedBy != null}">
+                    <i class="ri-user-line" style="color:var(--success);"></i>
+                    <strong> Posted by:</strong> <span th:text="${job.postedBy.fullName}"></span>
+                  </div>
+                  <div th:if="${job.createdAt != null}">
+                    <i class="ri-time-line" style="color:var(--text3);"></i>
+                    <strong> Posted:</strong>
+                    <span th:text="${job.createdAt != null ? job.createdAt.toLocalDate().toString() : '—'}"></span>
+                  </div>
+                </div>
+                <div style="margin-top:1rem;padding-top:.75rem;border-top:1px solid var(--border);">
+                  <p style="font-size:.78rem;color:var(--text3);">
+                    Interested? Contact HR at <strong>hr@peopleinfo.com</strong>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

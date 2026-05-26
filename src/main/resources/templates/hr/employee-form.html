@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Employee Form – PeopleInfo</title>
+<link rel="stylesheet" th:href="@{/css/style.css}"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+</head>
+<body>
+<div class="app-layout">
+  <div th:replace="~{fragments/sidebar :: hr-sidebar}"></div>
+  <div class="main-content">
+    <div class="topbar">
+      <div>
+        <div class="page-title" th:text="${isNew} ? 'Add New Employee' : 'Edit Employee'"></div>
+        <div class="page-subtitle">Fill in employee details</div>
+      </div>
+      <div class="topbar-actions">
+        <a th:href="@{/hr/employees}" class="btn btn-outline">
+          <i class="ri-arrow-left-line"></i> Back
+        </a>
+      </div>
+    </div>
+
+    <div class="page-body">
+      <div th:if="${error}" class="alert alert-danger"><i class="ri-error-warning-line"></i> <span th:text="${error}"></span></div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">
+            <i class="ri-user-line" style="color:var(--primary);"></i>
+            <span th:text="${isNew} ? 'New Employee Details' : 'Edit Employee: ' + ${employee.fullName}"></span>
+          </span>
+        </div>
+        <div class="card-body">
+          <form th:action="@{/hr/employees/save}" method="POST" th:object="${employee}">
+            <input type="hidden" th:field="*{id}"/>
+
+            <div style="margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border);">
+              <h3 style="font-size:.85rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:1rem;">
+                Personal Information
+              </h3>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">First Name *</label>
+                  <input type="text" th:field="*{firstName}" class="form-control" required/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Last Name *</label>
+                  <input type="text" th:field="*{lastName}" class="form-control" required/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Email *</label>
+                  <input type="email" th:field="*{email}" class="form-control" required
+                         th:readonly="${!isNew}"/>
+                </div>
+                <div class="form-group" th:if="${isNew}">
+                  <label class="form-label">Initial Password</label>
+                  <input type="text" name="newPassword" class="form-control" placeholder="Leave blank for Welcome@123"/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Phone</label>
+                  <input type="tel" th:field="*{phone}" class="form-control" placeholder="+1-555-0100"/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Date of Birth</label>
+                  <input type="date" th:field="*{dateOfBirth}" class="form-control"/>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border);">
+              <h3 style="font-size:.85rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:1rem;">
+                Employment Details
+              </h3>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Role *</label>
+                  <select th:field="*{role}" class="form-select" required>
+                    <option value="">Select role</option>
+                    <option th:each="r : ${roles}" th:value="${r}" th:text="${r}"></option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Department</label>
+                  <input type="text" th:field="*{department}" class="form-control"
+                         list="deptList" placeholder="Engineering"/>
+                  <datalist id="deptList">
+                    <option th:each="d : ${departments}" th:value="${d}"></option>
+                  </datalist>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Position / Title</label>
+                  <input type="text" th:field="*{position}" class="form-control" placeholder="Software Engineer"/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Date of Joining</label>
+                  <input type="date" th:field="*{dateOfJoining}" class="form-control"/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Salary (Annual)</label>
+                  <input type="number" th:field="*{salary}" class="form-control" placeholder="75000" step="1000"/>
+                </div>
+                <div class="form-group" th:if="${!isNew}">
+                  <label class="form-label">Employment Status</label>
+                  <select th:field="*{status}" class="form-select">
+                    <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}"></option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Address</label>
+              <textarea th:field="*{address}" class="form-control" rows="2" placeholder="123 Main St, City, State ZIP"></textarea>
+            </div>
+
+            <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:1rem;">
+              <a th:href="@{/hr/employees}" class="btn btn-outline">Cancel</a>
+              <button type="submit" class="btn btn-primary">
+                <i class="ri-save-line"></i>
+                <span th:text="${isNew} ? 'Create Employee' : 'Save Changes'"></span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

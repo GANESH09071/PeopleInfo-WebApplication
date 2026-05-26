@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hiring Requirements – PeopleInfo</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+  <div class="app-layout">
+    <div th:replace="~{fragments/sidebar :: hr-sidebar}"></div>
+    <div class="main-content">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Hiring Requirements</div>
+          <div class="page-subtitle">Manage open positions and job postings</div>
+        </div>
+        <div class="topbar-actions">
+          <a th:href="@{/hr/hiring/new}" class="btn btn-primary">
+            <i class="ri-add-line"></i> New Job Posting
+          </a>
+        </div>
+      </div>
+
+      <div class="page-body">
+        <div th:if="${success}" class="alert alert-success"><i class="ri-checkbox-circle-line"></i> <span
+            th:text="${success}"></span></div>
+
+        <div th:if="${#lists.isEmpty(jobs)}">
+          <div class="card">
+            <div class="empty-state" style="padding:3rem;">
+              <i class="ri-briefcase-line"></i>
+              <p>No job postings yet. Create one!</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:1.25rem;"
+          th:if="${!#lists.isEmpty(jobs)}">
+          <div class="card" th:each="job : ${jobs}" style="transition:transform .15s,box-shadow .15s;"
+            onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='var(--shadow-md)'"
+            onmouseout="this.style.transform='none';this.style.boxShadow='var(--shadow)'">
+            <div class="card-header">
+              <div>
+                <div style="font-weight:700;font-size:1rem;" th:text="${job.jobTitle}"></div>
+                <div class="text-sm text-muted mt-1" th:text="${job.department}"></div>
+              </div>
+              <span th:class="${job.status.name() == 'OPEN'} ? 'badge badge-success' :
+                            (${job.status.name() == 'FILLED'} ? 'badge badge-primary' : 'badge badge-secondary')"
+                th:text="${job.status}"></span>
+            </div>
+            <div class="card-body" style="padding:1.25rem;">
+              <p class="text-sm text-muted" style="margin-bottom:1rem;line-height:1.6;"
+                th:text="${#strings.abbreviate(job.description, 120)}"></p>
+              <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;">
+                <span class="badge badge-info" th:text="${job.experienceLevel}"></span>
+                <span class="badge badge-secondary" th:text="${job.jobType}"></span>
+                <span class="badge badge-primary" th:if="${job.positionsAvailable != null}"
+                  th:text="${job.positionsAvailable} + ' opening(s)'"></span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;font-size:.8rem;color:var(--text2);">
+                <div th:if="${job.location}">
+                  <i class="ri-map-pin-line"></i> <span th:text="${job.location}"></span>
+                </div>
+                <div th:if="${job.deadlineDate}">
+                  <i class="ri-calendar-line"></i> <span th:text="'Deadline: ' + ${job.deadlineDate}"></span>
+                </div>
+                <div th:if="${job.salaryRangeMin != null}">
+                  <!-- <i class="ri-money-dollar-circle-line"></i> -->
+                  <span th:text="'₹' + ${job.salaryRangeMin/1000} + 'K – ₹' + ${job.salaryRangeMax/1000} + 'K'"></span>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer" style="display:flex;gap:.5rem;justify-content:flex-end;">
+              <a th:href="@{/hr/hiring/{id}/edit(id=${job.id})}" class="btn btn-outline btn-sm">
+                <i class="ri-edit-line"></i> Edit
+              </a>
+              <form th:id="'del-job-' + ${job.id}" th:action="@{/hr/hiring/{id}/delete(id=${job.id})}" method="POST"
+                style="display:inline;">
+                <button type="button" class="btn btn-danger btn-sm"
+                  th:onclick="'confirmDelete(\'del-job-' + ${job.id} + '\')'">
+                  <i class="ri-delete-bin-line"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script th:src="@{/js/app.js}"></script>
+</body>
+
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<!-- HR SIDEBAR -->
+<div th:fragment="hr-sidebar" class="sidebar">
+  <a th:href="@{/hr/dashboard}" class="sidebar-brand">
+    <div class="brand-icon"><i class="ri-team-fill"></i></div>
+    <div class="brand-text">
+      <span class="name">PeopleInfo</span>
+      <span class="tagline">HR Portal</span>
+    </div>
+  </a>
+
+  <nav class="sidebar-nav">
+    <span class="nav-section">Main</span>
+    <a th:href="@{/hr/dashboard}" class="nav-link">
+      <i class="ri-dashboard-line"></i> Dashboard
+    </a>
+
+    <span class="nav-section">Workforce</span>
+    <a th:href="@{/hr/employees}" class="nav-link">
+      <i class="ri-group-line"></i> Employees
+    </a>
+    <a th:href="@{/hr/leaves}" class="nav-link">
+      <i class="ri-calendar-check-line"></i> Leave Approvals
+      <span class="nav-badge" th:if="${pendingLeaveCount != null and pendingLeaveCount > 0}"
+            th:text="${pendingLeaveCount}"></span>
+    </a>
+    <a th:href="@{/hr/timesheets}" class="nav-link">
+      <i class="ri-time-line"></i> Timesheets
+    </a>
+
+    <span class="nav-section">Recruitment</span>
+    <a th:href="@{/hr/hiring}" class="nav-link">
+      <i class="ri-briefcase-line"></i> Hiring Requirements
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-mini">
+      <div class="user-avatar-sm"
+           th:text="${currentUser != null} ? ${currentUser.firstName.substring(0,1)} + ${currentUser.lastName.substring(0,1)} : 'HR'">
+      </div>
+      <div class="user-mini-info">
+        <span class="uname" th:text="${currentUser?.fullName} ?: 'HR User'"></span>
+        <span class="urole">HR Manager</span>
+      </div>
+    </div>
+    <a th:href="@{/logout}" class="logout-btn">
+      <i class="ri-logout-box-line"></i> Sign Out
+    </a>
+  </div>
+</div>
+
+<!-- EMPLOYEE SIDEBAR -->
+<div th:fragment="emp-sidebar" class="sidebar">
+  <a th:href="@{/employee/dashboard}" class="sidebar-brand">
+    <div class="brand-icon"><i class="ri-team-fill"></i></div>
+    <div class="brand-text">
+      <span class="name">PeopleInfo</span>
+      <span class="tagline">Employee Portal</span>
+    </div>
+  </a>
+
+  <nav class="sidebar-nav">
+    <span class="nav-section">Main</span>
+    <a th:href="@{/employee/dashboard}" class="nav-link">
+      <i class="ri-dashboard-line"></i> Dashboard
+    </a>
+
+    <span class="nav-section">My Work</span>
+    <a th:href="@{/employee/timesheets}" class="nav-link">
+      <i class="ri-time-line"></i> My Timesheets
+    </a>
+    <a th:href="@{/employee/leaves}" class="nav-link">
+      <i class="ri-calendar-event-line"></i> My Leaves
+    </a>
+
+    <span class="nav-section">Company</span>
+    <a th:href="@{/employee/directory}" class="nav-link">
+      <i class="ri-group-line"></i> Employee Directory
+    </a>
+    <a th:href="@{/employee/hiring}" class="nav-link">
+      <i class="ri-briefcase-line"></i> Open Positions
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-mini">
+      <div class="user-avatar-sm"
+           th:text="${currentUser != null} ? ${currentUser.firstName.substring(0,1)} + ${currentUser.lastName.substring(0,1)} : 'ME'">
+      </div>
+      <div class="user-mini-info">
+        <span class="uname" th:text="${currentUser?.fullName} ?: 'Employee'"></span>
+        <span class="urole" th:text="${currentUser?.position} ?: 'Employee'"></span>
+      </div>
+    </div>
+    <a th:href="@{/logout}" class="logout-btn">
+      <i class="ri-logout-box-line"></i> Sign Out
+    </a>
+  </div>
+</div>
+
+</html>
