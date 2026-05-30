@@ -72,6 +72,11 @@ public class SecurityConfig {
                 .deleteCookies("JSESSIONID") // Explicitly instruct the browser to delete the session cookie
                 .permitAll()
             )
+            .rememberMe(remember -> remember
+                .key("uniqueRememberMeKeyForPeopleInfo")
+                .tokenValiditySeconds(86400) // 24 hours
+                .userDetailsService(userDetailsService)
+            )
             .userDetailsService(userDetailsService);
 
         return http.build();

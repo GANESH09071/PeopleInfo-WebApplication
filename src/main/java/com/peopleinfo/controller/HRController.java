@@ -21,6 +21,7 @@ public class HRController {
     private final LeaveService leaveService;
     private final TimesheetService timesheetService;
     private final HiringService hiringService;
+    private final NlpJobGeneratorService nlpJobGeneratorService;
 
     // ─── DASHBOARD ───────────────────────────────────────────────────────────────
     @GetMapping("/dashboard")
@@ -30,7 +31,20 @@ public class HRController {
         model.addAttribute("pendingLeaves", leaveService.countPendingLeaves());
         model.addAttribute("pendingTimesheets", timesheetService.countPendingTimesheets());
         model.addAttribute("openJobs", hiringService.countOpenJobs());
-        model.addAttribute("recentLeaves", leaveService.getPendingLeaves());
+        
+        List<LeaveRequest> pending = leaveService.getPendingLeaves();
+        List<LeaveRequest> sortedPending = new java.util.ArrayList<>(pending);
+        sortedPending.sort((l1, l2) -> {
+            if (l1.isUrgent() != l2.isUrgent()) {
+                return l1.isUrgent() ? -1 : 1;
+            }
+            if (l1.getAppliedOn() != null && l2.getAppliedOn() != null) {
+                return l2.getAppliedOn().compareTo(l1.getAppliedOn());
+            }
+            return 0;
+        });
+
+        model.addAttribute("recentLeaves", sortedPending);
         model.addAttribute("allEmployees", userService.getAllEmployees());
         return "hr/dashboard";
     }
@@ -126,10 +140,22 @@ public class HRController {
     public String leaves(@RequestParam(required = false) String status, Model model,
                          @AuthenticationPrincipal UserPrincipal principal) {
         model.addAttribute("currentUser", principal.getUser());
-        List<LeaveRequest> leaves = (status != null && !status.isBlank())
+        List<LeaveRequest> fetchedLeaves = (status != null && !status.isBlank())
                 ? leaveService.getAllLeaves().stream()
                     .filter(l -> l.getStatus().name().equalsIgnoreCase(status)).toList()
                 : leaveService.getAllLeaves();
+        
+        List<LeaveRequest> leaves = new java.util.ArrayList<>(fetchedLeaves);
+        leaves.sort((l1, l2) -> {
+            if (l1.isUrgent() != l2.isUrgent()) {
+                return l1.isUrgent() ? -1 : 1;
+            }
+            if (l1.getAppliedOn() != null && l2.getAppliedOn() != null) {
+                return l2.getAppliedOn().compareTo(l1.getAppliedOn());
+            }
+            return 0;
+        });
+
         model.addAttribute("leaves", leaves);
         model.addAttribute("statusFilter", status);
         return "hr/leaves";
@@ -253,5 +279,14 @@ public class HRController {
         hiringService.delete(id);
         ra.addFlashAttribute("success", "Job posting deleted.");
         return "redirect:/hr/hiring";
+    }
+
+    @GetMapping("/hiring/generate")
+    @ResponseBody
+    public GeneratedJobDetails generateJobDetails(
+            @RequestParam String jobTitle,
+            @RequestParam(required = false) Integer yearsOfExperience,
+            @RequestParam(required = false) String experienceLevel) {
+        return nlpJobGeneratorService.generateJobDetails(jobTitle, yearsOfExperience, experienceLevel);
     }
 }

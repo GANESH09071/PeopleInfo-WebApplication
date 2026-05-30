@@ -21,6 +21,7 @@ public class EmployeeController {
     private final LeaveService leaveService;
     private final TimesheetService timesheetService;
     private final HiringService hiringService;
+    private final com.peopleinfo.repository.NotificationRepository notificationRepository;
 
     // ─── DASHBOARD ───────────────────────────────────────────────────────────────
     @GetMapping("/dashboard")
@@ -125,6 +126,12 @@ public class EmployeeController {
         model.addAttribute("pendingCount",  pending);
         model.addAttribute("approvedCount", approved);
         model.addAttribute("rejectedCount", rejected);
+
+        model.addAttribute("slBalance", leaveService.getAvailableSickLeave(me));
+        model.addAttribute("elBalance", leaveService.getAvailableEarnedLeave(me));
+        model.addAttribute("clBalance", leaveService.getAvailableCasualLeave(me));
+        model.addAttribute("flBalance", leaveService.getAvailableFlexiLeave(me));
+        
         return "employee/leaves";
     }
 
@@ -136,11 +143,30 @@ public class EmployeeController {
                              @RequestParam(required = false) String reason,
                              RedirectAttributes ra) {
         User me = principal.getUser();
+        LeaveRequest.LeaveType type = LeaveRequest.LeaveType.valueOf(leaveType);
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+        
+        long requestedDays = java.time.temporal.ChronoUnit.DAYS.between(start, end) + 1;
+        double available = 0;
+        
+        switch (type) {
+            case SICK: available = leaveService.getAvailableSickLeave(me); break;
+            case EARNED: available = leaveService.getAvailableEarnedLeave(me); break;
+            case CASUAL: available = leaveService.getAvailableCasualLeave(me); break;
+            case FLEXI: available = leaveService.getAvailableFlexiLeave(me); break;
+        }
+        
+        if (requestedDays > available) {
+            ra.addFlashAttribute("error", "Insufficient balance for " + type + " leave. You requested " + requestedDays + " days, but only have " + available + " available.");
+            return "redirect:/employee/leaves";
+        }
+
         LeaveRequest leave = LeaveRequest.builder()
                 .employee(me)
-                .leaveType(LeaveRequest.LeaveType.valueOf(leaveType))
-                .startDate(LocalDate.parse(startDate))
-                .endDate(LocalDate.parse(endDate))
+                .leaveType(type)
+                .startDate(start)
+                .endDate(end)
                 .reason(reason)
                 .status(LeaveRequest.LeaveStatus.PENDING)
                 .build();
@@ -168,5 +194,18 @@ public class EmployeeController {
         model.addAttribute("currentUser", principal.getUser());
         model.addAttribute("jobs", hiringService.getOpenJobs());
         return "employee/hiring";
+    }
+
+    // ─── NOTIFICATIONS ────────────────────────────────────────────────────────────
+    @PostMapping("/notifications/read")
+    public String readNotifications(@AuthenticationPrincipal UserPrincipal principal, 
+                                    @RequestHeader(value = "Referer", required = false) String referer) {
+        User me = principal.getUser();
+        java.util.List<Notification> unread = notificationRepository.findByEmployeeOrderByCreatedAtDesc(me).stream()
+                .filter(n -> !n.isRead()).toList();
+        unread.forEach(n -> n.setRead(true));
+        notificationRepository.saveAll(unread);
+        
+        return "redirect:" + (referer != null ? referer : "/employee/dashboard");
     }
 }

@@ -33,7 +33,12 @@
             <div class="form-grid">
               <div class="form-group">
                 <label class="form-label">Job Title *</label>
-                <input type="text" th:field="*{jobTitle}" class="form-control" required placeholder="e.g. Senior Developer"/>
+                <div style="display:flex; gap:0.5rem;">
+                  <input type="text" th:field="*{jobTitle}" class="form-control" required placeholder="e.g. Senior Developer"/>
+                  <button type="button" id="btnAiGenerate" class="btn btn-outline" style="border-color: var(--info); color: var(--info); display: flex; align-items: center; gap: 0.25rem;">
+                    <i class="ri-magic-line"></i> AI Generate
+                  </button>
+                </div>
               </div>
               <div class="form-group">
                 <label class="form-label">Department</label>
@@ -48,6 +53,10 @@
                   <option value="">Select level</option>
                   <option th:each="el : ${experienceLevels}" th:value="${el}" th:text="${el}"></option>
                 </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Years of Experience (AI Help)</label>
+                <input type="number" id="yearsOfExperience" class="form-control" min="0" max="40" placeholder="e.g. 5 (For AI generate)"/>
               </div>
               <div class="form-group">
                 <label class="form-label">Job Type</label>
@@ -114,5 +123,78 @@
   </div>
 </div>
 <script th:src="@{/js/app.js}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('btnAiGenerate');
+  if (!btn) return;
+
+  btn.addEventListener('click', async () => {
+    const jobTitleInput = document.getElementById('jobTitle');
+    const jobTitle = jobTitleInput ? jobTitleInput.value.trim() : '';
+    if (!jobTitle) {
+      alert('Please enter a Job Title first.');
+      if (jobTitleInput) jobTitleInput.focus();
+      return;
+    }
+
+    const expInput = document.getElementById('yearsOfExperience');
+    const yearsOfExperience = expInput ? expInput.value : '';
+    
+    const levelSelect = document.getElementById('experienceLevel');
+    const experienceLevel = levelSelect ? levelSelect.value : '';
+
+    // Save original button content
+    const origHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Generating...';
+
+    try {
+      const url = new URL('/hr/hiring/generate', window.location.origin);
+      url.searchParams.append('jobTitle', jobTitle);
+      if (yearsOfExperience) {
+        url.searchParams.append('yearsOfExperience', yearsOfExperience);
+      }
+      if (experienceLevel) {
+        url.searchParams.append('experienceLevel', experienceLevel);
+      }
+
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Failed to generate. Server returned error.');
+      const data = await res.json();
+
+      // Populate textareas
+      const descArea = document.getElementById('description');
+      const reqsArea = document.getElementById('requirements');
+      const respsArea = document.getElementById('responsibilities');
+
+      if (descArea && data.description) {
+        descArea.value = data.description;
+        descArea.style.transition = 'background-color 0.5s';
+        descArea.style.backgroundColor = '#ede9fe'; // light violet matching var(--info)
+        setTimeout(() => descArea.style.backgroundColor = '', 1000);
+      }
+      if (reqsArea && data.requirements) {
+        reqsArea.value = data.requirements;
+        reqsArea.style.transition = 'background-color 0.5s';
+        reqsArea.style.backgroundColor = '#ede9fe';
+        setTimeout(() => reqsArea.style.backgroundColor = '', 1000);
+      }
+      if (respsArea && data.responsibilities) {
+        respsArea.value = data.responsibilities;
+        respsArea.style.transition = 'background-color 0.5s';
+        respsArea.style.backgroundColor = '#ede9fe';
+        setTimeout(() => respsArea.style.backgroundColor = '', 1000);
+      }
+
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred during AI generation: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = origHtml;
+    }
+  });
+});
+</script>
 </body>
 </html>

@@ -25,4 +25,7 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long
     long countApprovedLeavesByEmployee(User employee);
 
     List<LeaveRequest> findByEmployeeAndStatus(User employee, LeaveRequest.LeaveStatus status);
+
+    @Query("SELECT l FROM LeaveRequest l WHERE l.employee = :employee AND l.status = 'APPROVED' AND l.leaveType = :leaveType AND YEAR(l.startDate) = :year")
+    List<LeaveRequest> findApprovedLeavesByUserAndTypeAndYear(@org.springframework.data.repository.query.Param("employee") User employee, @org.springframework.data.repository.query.Param("leaveType") LeaveRequest.LeaveType leaveType, @org.springframework.data.repository.query.Param("year") int year);
 }

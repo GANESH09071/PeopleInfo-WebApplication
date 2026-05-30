@@ -1,168 +1,962 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
-<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>My Leaves – PeopleInfo</title>
-<link rel="stylesheet" th:href="@{/css/style.css}"/>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Leaves – PeopleInfo</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* Custom Scoped Styles for Leaves Dashboard */
+    .leaves-layout-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 1.25rem;
+      margin: 0 auto 2rem auto;
+      max-width: 820px;
+    }
+
+    @media (max-width: 1024px) {
+      .leaves-layout-grid {
+        grid-template-columns: 1fr;
+        max-width: 100%;
+        margin: 0 0 2rem 0;
+      }
+    }
+
+    /* Leave Balance Cards */
+    .leave-balance-container {
+      margin: 0 auto 1.75rem auto;
+      max-width: 820px;
+    }
+
+    @media (max-width: 1024px) {
+      .leave-balance-container {
+        max-width: 100%;
+        margin: 0 0 1.75rem 0;
+      }
+    }
+
+    .leave-balance-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 768px) {
+      .leave-balance-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .leave-balance-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .balance-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      box-shadow: var(--shadow);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .balance-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .balance-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+    }
+
+    .balance-card.sick::after {
+      background: var(--danger);
+    }
+
+    .balance-card.earned::after {
+      background: var(--success);
+    }
+
+    .balance-card.casual::after {
+      background: var(--warning);
+    }
+
+    .balance-card.flexi::after {
+      background: var(--info);
+    }
+
+    .balance-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      flex-shrink: 0;
+      transition: transform 0.2s ease;
+    }
+
+    .balance-card:hover .balance-icon {
+      transform: scale(1.1);
+    }
+
+    .balance-card.sick .balance-icon {
+      background: #fee2e2;
+      color: var(--danger);
+    }
+
+    .balance-card.earned .balance-icon {
+      background: #dcfce7;
+      color: var(--success);
+    }
+
+    .balance-card.casual .balance-icon {
+      background: #fef9c3;
+      color: var(--warning);
+    }
+
+    .balance-card.flexi .balance-icon {
+      background: #ede9fe;
+      color: var(--info);
+    }
+
+    .balance-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .balance-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text3);
+      letter-spacing: 0.5px;
+    }
+
+    .balance-value {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.1;
+      margin-top: 0.15rem;
+    }
+
+    /* Calendar Styling */
+    .calendar-card {
+      overflow: hidden;
+    }
+
+    .calendar-header-custom {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0.9rem 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .calendar-month-year {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .calendar-nav-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text2);
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .calendar-nav-btn:hover:not(.disabled) {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .calendar-nav-btn.disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .calendar-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      background: var(--surface2);
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text2);
+      letter-spacing: 0.5px;
+    }
+
+    .calendar-days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      padding: 0.5rem;
+      gap: 0.2rem 0.15rem;
+    }
+
+    .calendar-day-cell {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      user-select: none;
+    }
+
+    .calendar-day-cell:hover:not(.weekend):not(.disabled):not(.has-leave-approved):not(.has-leave-pending):not(.has-leave-rejected) {
+      background: #f1f5f9;
+      color: var(--primary);
+      transform: scale(1.05);
+    }
+
+    .calendar-day-cell.weekend {
+      color: var(--text3);
+      background: #f8fafc;
+      cursor: not-allowed;
+    }
+
+    .calendar-day-cell.empty {
+      cursor: default;
+      background: transparent !important;
+    }
+
+    .calendar-day-cell.today {
+      box-shadow: inset 0 0 0 2px var(--primary-light);
+    }
+
+    /* Event types in calendar */
+    .calendar-day-cell.has-leave-approved {
+      background: #dcfce7 !important;
+      color: #166534 !important;
+      font-weight: 700;
+    }
+
+    .calendar-day-cell.has-leave-pending {
+      background: #fef9c3 !important;
+      color: #854d0e !important;
+      font-weight: 700;
+    }
+
+    .calendar-day-cell.has-leave-rejected {
+      background: #fee2e2 !important;
+      color: #991b1b !important;
+      font-weight: 700;
+    }
+
+    /* Selection capsule highlighting */
+    .calendar-day-cell.selected-day {
+      background: var(--primary) !important;
+      color: white !important;
+      border-radius: 50% !important;
+      box-shadow: var(--shadow);
+    }
+
+    .calendar-day-cell.selected-range-start {
+      border-top-left-radius: 50% !important;
+      border-bottom-left-radius: 50% !important;
+      border-top-right-radius: 0px !important;
+      border-bottom-right-radius: 0px !important;
+      background: var(--primary) !important;
+      color: white !important;
+    }
+
+    .calendar-day-cell.selected-range-end {
+      border-top-right-radius: 50% !important;
+      border-bottom-right-radius: 50% !important;
+      border-top-left-radius: 0px !important;
+      border-bottom-left-radius: 0px !important;
+      background: var(--primary) !important;
+      color: white !important;
+    }
+
+    .calendar-day-cell.selected-range-mid {
+      border-radius: 0px !important;
+      background: #e0f2fe !important;
+      color: var(--primary-dark) !important;
+    }
+
+    /* Legend styling */
+    .calendar-legend {
+      padding: 0.75rem 1rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+      justify-content: center;
+      background: var(--surface2);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text2);
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .legend-dot.weekend {
+      background: #0273e5;
+      border: 1px solid var(--border);
+    }
+
+    .legend-dot.approved {
+      background: #02f758;
+    }
+
+    .legend-dot.pending {
+      background: #fbe602;
+    }
+
+    .legend-dot.rejected {
+      background: #ef4444;
+    }
+
+    .legend-dot.selected {
+      background: var(--primary);
+    }
+
+    /* Selected Date Chip Form Display */
+    .dates-chip-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 0.75rem;
+      background: var(--surface2);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 0.5rem;
+      transition: all 0.25s ease;
+    }
+
+    .dates-chip-placeholder {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: var(--text3);
+      font-size: 0.85rem;
+      justify-content: center;
+      padding: 0.5rem 0;
+    }
+
+    .dates-chip-placeholder i {
+      font-size: 1.25rem;
+    }
+
+    .dates-chips-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .date-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.85rem;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text);
+      box-shadow: var(--shadow);
+      flex: 1;
+      justify-content: center;
+    }
+
+    .date-chip i {
+      color: var(--primary);
+      font-size: 1rem;
+    }
+
+    .date-chip-arrow {
+      color: var(--text3);
+      font-size: 1.2rem;
+    }
+
+    .working-days-badge {
+      background: #eff6ff;
+      color: var(--primary);
+      border: 1px solid #bfdbfe;
+      padding: 0.3rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      align-self: center;
+      box-shadow: var(--shadow);
+      animation: pop-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes pop-in {
+      0% {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* History table status custom badge icons */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .status-badge i {
+      font-size: 0.85rem;
+    }
+
+    .status-badge.approved {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status-badge.pending {
+      background: #fef9c3;
+      color: #854d0e;
+      animation: pulse-slow 2s infinite ease-in-out;
+    }
+
+    .status-badge.rejected {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    @keyframes pulse-slow {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.6;
+      }
+    }
+
+    @keyframes border-flash {
+
+      0%,
+      100% {
+        border-color: var(--border);
+        box-shadow: var(--shadow);
+      }
+
+      50% {
+        border-color: var(--primary-light);
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25);
+      }
+    }
+
+    .flash-border {
+      animation: border-flash 1s ease-in-out 2;
+    }
+  </style>
 </head>
+
 <body>
-<div class="app-layout">
-  <div th:replace="~{fragments/sidebar :: emp-sidebar}"></div>
-  <div class="main-content">
+  <div class="app-layout">
+    <div th:replace="~{fragments/sidebar :: emp-sidebar}"></div>
+    <div class="main-content">
 
-    <div class="topbar">
-      <div>
-        <div class="page-title">My Leaves</div>
-        <div class="page-subtitle">Apply for and track your leave requests</div>
-      </div>
-      <div class="topbar-actions">
-        <button class="btn btn-primary" onclick="openModal('leaveModal')">
-          <i class="ri-calendar-event-line"></i> Apply for Leave
-        </button>
-      </div>
-    </div>
-
-    <div class="page-body">
-      <div th:if="${success}" class="alert alert-success">
-        <i class="ri-checkbox-circle-line"></i>
-        <span th:text="${success}"></span>
-      </div>
-      <div th:if="${error}" class="alert alert-danger">
-        <i class="ri-error-warning-line"></i>
-        <span th:text="${error}"></span>
-      </div>
-
-      <!-- Summary Stats -->
-      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.5rem;">
-        <div class="stat-card">
-          <div class="stat-icon yellow"><i class="ri-loader-line"></i></div>
-          <div class="stat-info">
-            <div class="label">Pending</div>
-            <div class="value" th:text="${pendingCount}">0</div>
-          </div>
+      <div class="topbar">
+        <div>
+          <div class="page-title">My Leaves</div>
+          <div class="page-subtitle">Apply for and track your leave requests</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon green"><i class="ri-checkbox-circle-line"></i></div>
-          <div class="stat-info">
-            <div class="label">Approved</div>
-            <div class="value" th:text="${approvedCount}">0</div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon red"><i class="ri-close-circle-line"></i></div>
-          <div class="stat-info">
-            <div class="label">Rejected</div>
-            <div class="value" th:text="${rejectedCount}">0</div>
-          </div>
+        <div class="topbar-actions">
+          <button class="btn btn-primary" onclick="scrollToForm()">
+            <i class="ri-edit-box-line"></i> Apply for Leave
+          </button>
         </div>
       </div>
 
-      <!-- Leave History -->
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Leave History</span>
-          <span class="badge badge-primary" th:text="${leaves.size()} + ' requests'"></span>
+      <div class="page-body">
+        <div th:if="${success}" class="alert alert-success">
+          <i class="ri-checkbox-circle-line"></i>
+          <span th:text="${success}"></span>
         </div>
-        <div th:if="${#lists.isEmpty(leaves)}">
-          <div class="empty-state" style="padding:2.5rem;">
-            <i class="ri-calendar-event-line"></i>
-            <p>No leave requests yet. Click "Apply for Leave" to get started.</p>
+        <div th:if="${error}" class="alert alert-danger">
+          <i class="ri-error-warning-line"></i>
+          <span th:text="${error}"></span>
+        </div>
+
+        <!-- Leave Balances Grid (Top) -->
+        <div class="leave-balance-container">
+          <div class="leave-balance-grid">
+            <!-- Sick Leave (SL) -->
+            <div class="balance-card sick">
+              <div class="balance-icon"><i class="ri-heart-pulse-line"></i></div>
+              <div class="balance-info">
+                <span class="balance-label">Sick Leave (SL)</span>
+                <span class="balance-value" th:text="${slBalance}">0.0</span>
+              </div>
+            </div>
+            <!-- Earned Leave (EL) -->
+            <div class="balance-card earned">
+              <div class="balance-icon"><i class="ri-briefcase-line"></i></div>
+              <div class="balance-info">
+                <span class="balance-label">Earned Leave (EL)</span>
+                <span class="balance-value" th:text="${elBalance}">0.0</span>
+              </div>
+            </div>
+            <!-- Casual Leave (CL) -->
+            <div class="balance-card casual">
+              <div class="balance-icon"><i class="ri-sun-line"></i></div>
+              <div class="balance-info">
+                <span class="balance-label">Casual Leave (CL)</span>
+                <span class="balance-value" th:text="${clBalance}">0.0</span>
+              </div>
+            </div>
+            <!-- Flexi Leave (FL) -->
+            <div class="balance-card flexi">
+              <div class="balance-icon"><i class="ri-calendar-todo-line"></i></div>
+              <div class="balance-info">
+                <span class="balance-label">Flexi Leave (FL)</span>
+                <span class="balance-value" th:text="${flBalance}">0.0</span>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="table-wrap" th:unless="${#lists.isEmpty(leaves)}">
-          <table>
-            <thead>
-              <tr>
-                <th>Leave Type</th>
-                <th>From</th>
-                <th>To</th>
-                <th>Days</th>
-                <th>Reason</th>
-                <th>Status</th>
-                <th>HR Comments</th>
-                <th>Applied On</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr th:each="leave : ${leaves}">
-                <td><span class="badge badge-info" th:text="${leave.leaveType}"></span></td>
-                <td style="font-weight:500;" th:text="${leave.startDate}"></td>
-                <td th:text="${leave.endDate}"></td>
-                <td><strong th:text="${leave.totalDays}"></strong></td>
-                <td class="text-sm text-muted"
-                    style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
-                    th:text="${leave.reason != null ? leave.reason : '—'}"></td>
-                <td>
-                  <span th:if="${leave.status.name() == 'APPROVED'}"
-                        class="badge badge-success">APPROVED</span>
-                  <span th:if="${leave.status.name() == 'REJECTED'}"
-                        class="badge badge-danger">REJECTED</span>
-                  <span th:if="${leave.status.name() == 'PENDING'}"
-                        class="badge badge-warning">PENDING</span>
-                </td>
-                <td class="text-sm text-muted"
-                    th:text="${leave.hrComments != null ? leave.hrComments : '—'}"></td>
-                <td class="text-sm text-muted"
+
+        <!-- Calendar and Application Area -->
+        <div class="leaves-layout-grid">
+
+          <!-- Left Column: Calendar -->
+          <div class="card calendar-card" id="calendar-card">
+            <div class="calendar-header-custom">
+              <button id="prevMonthBtn" class="calendar-nav-btn">
+                <i class="ri-arrow-left-s-line"></i>
+              </button>
+              <span class="calendar-month-year" id="calendarMonthYear">Month, Year</span>
+              <button id="nextMonthBtn" class="calendar-nav-btn">
+                <i class="ri-arrow-right-s-line"></i>
+              </button>
+            </div>
+            <div class="card-body" style="padding: 0;">
+              <div class="calendar-weekdays">
+                <div>Su</div>
+                <div>Mo</div>
+                <div>Tu</div>
+                <div>We</div>
+                <div>Th</div>
+                <div>Fr</div>
+                <div>Sa</div>
+              </div>
+              <div id="leaveCalendarDays" class="calendar-days-grid">
+                <!-- Days injected via JS -->
+              </div>
+              <div class="calendar-legend">
+                <div class="legend-item">
+                  <div class="legend-dot holiday"></div> Holiday
+                </div>
+                <div class="legend-item">
+                  <div class="legend-dot weekend"></div> Weekend
+                </div>
+                <div class="legend-item">
+                  <div class="legend-dot pending"></div> Pending Leave
+                </div>
+                <div class="legend-item">
+                  <div class="legend-dot approved"></div> Approved Leave
+                </div>
+                <div class="legend-item">
+                  <div class="legend-dot rejected"></div> Rejected Leave
+                </div>
+                <div class="legend-item">
+                  <div class="legend-dot selected"></div> Selected
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Application Form -->
+          <div class="card" id="apply-card">
+            <div class="card-header">
+              <span class="card-title">Apply for Leave</span>
+            </div>
+            <form th:action="@{/employee/leaves/apply}" method="POST">
+              <div class="card-body" style="padding: 1rem 1.25rem;">
+                <div class="form-group">
+                  <label class="form-label">Selected Dates</label>
+                  <div class="dates-chip-container">
+                    <div id="datesChipPlaceholder" class="dates-chip-placeholder">
+                      <i class="ri-calendar-line"></i>
+                      <span>Select date range on the calendar</span>
+                    </div>
+                    <div id="datesChipsWrapper" class="dates-chips-wrapper" style="display: none;">
+                      <div class="date-chip">
+                        <i class="ri-calendar-event-line"></i>
+                        <span id="displayStartDate">YYYY-MM-DD</span>
+                      </div>
+                      <i class="ri-arrow-right-line date-chip-arrow"></i>
+                      <div class="date-chip">
+                        <i class="ri-calendar-check-line"></i>
+                        <span id="displayEndDate">YYYY-MM-DD</span>
+                      </div>
+                    </div>
+                    <div id="workingDaysBadge" class="working-days-badge" style="display: none;">
+                      <i class="ri-time-line"></i>
+                      <span id="workingDaysCount">0 working days</span>
+                    </div>
+                  </div>
+                  <input type="hidden" name="startDate" id="formStartDate" required />
+                  <input type="hidden" name="endDate" id="formEndDate" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Leave Type *</label>
+                  <select name="leaveType" class="form-select" id="formLeaveType" required>
+                    <option value="">-- Select Type --</option>
+                    <option value="SICK">Sick Leave</option>
+                    <option value="EARNED">Earned Leave</option>
+                    <option value="CASUAL">Casual Leave</option>
+                    <option value="FLEXI">Flexi Leave</option>
+                  </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 0.5rem;">
+                  <label class="form-label">Reason</label>
+                  <textarea name="reason" class="form-control" rows="2"
+                    placeholder="Explain the reason for leave request..."></textarea>
+                </div>
+              </div>
+              <div class="card-footer" style="padding: 0.75rem 1.25rem;">
+                <button type="submit" class="btn btn-primary w-100" style="justify-content: center;" id="applyLeaveBtn" disabled>Submit Request</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Leave History -->
+        <div class="card history-card">
+          <div class="card-header history-header">
+            <span class="card-title">Leave History</span>
+            <span class="badge badge-primary" th:text="${leaves.size()} + ' requests'"></span>
+          </div>
+          <div th:if="${#lists.isEmpty(leaves)}">
+            <div class="empty-state" style="padding:2.5rem;">
+              <i class="ri-calendar-event-line"></i>
+              <p>No leave requests yet. Use the calendar and form above to apply for leaves.</p>
+            </div>
+          </div>
+          <div class="table-wrap" th:unless="${#lists.isEmpty(leaves)}">
+            <table>
+              <thead>
+                <tr>
+                  <th>Leave Type</th>
+                  <th>From</th>
+                  <th>To</th>
+                  <th>Days</th>
+                  <th>Reason</th>
+                  <th>Status</th>
+                  <th>HR Comments</th>
+                  <th>Applied On</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="leave : ${leaves}">
+                  <td><span class="badge badge-info" th:text="${leave.leaveType}"></span></td>
+                  <td style="font-weight:600;" th:text="${leave.startDate}"></td>
+                  <td style="font-weight:600;" th:text="${leave.endDate}"></td>
+                  <td><strong th:text="${leave.totalDays}"></strong></td>
+                  <td class="text-sm text-muted"
+                    style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                    th:text="${leave.reason != null ? leave.reason : '—'}" th:title="${leave.reason}"></td>
+                  <td>
+                    <span th:if="${leave.status.name() == 'APPROVED'}" class="status-badge approved">
+                      <i class="ri-checkbox-circle-line"></i> APPROVED
+                    </span>
+                    <span th:if="${leave.status.name() == 'REJECTED'}" class="status-badge rejected">
+                      <i class="ri-close-circle-line"></i> REJECTED
+                    </span>
+                    <span th:if="${leave.status.name() == 'PENDING'}" class="status-badge pending">
+                      <i class="ri-time-line"></i> PENDING
+                    </span>
+                  </td>
+                  <td class="text-sm text-muted" th:text="${leave.hrComments != null ? leave.hrComments : '—'}"></td>
+                  <td class="text-sm text-muted"
                     th:text="${leave.appliedOn != null ? leave.appliedOn.toLocalDate().toString() : '—'}"></td>
-              </tr>
-            </tbody>
-          </table>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Apply Leave Modal -->
-<div class="modal-overlay" id="leaveModal">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title">
-        <i class="ri-calendar-event-line"></i> Apply for Leave
-      </span>
-      <button class="btn btn-outline btn-sm btn-icon" onclick="closeModal('leaveModal')">
-        <i class="ri-close-line"></i>
-      </button>
-    </div>
-    <form th:action="@{/employee/leaves/apply}" method="POST">
-      <div class="modal-body">
-        <div class="form-group">
-          <label class="form-label">Leave Type *</label>
-          <select name="leaveType" class="form-select" required>
-            <option value="">-- Select Leave Type --</option>
-            <option th:each="type : ${leaveTypes}" th:value="${type.name()}" th:text="${type.name()}"></option>
-          </select>
-        </div>
-        <div class="form-grid-2">
-          <div class="form-group">
-            <label class="form-label">Start Date *</label>
-            <input type="date" name="startDate" class="form-control"
-                   required th:min="${todayStr}"/>
-          </div>
-          <div class="form-group">
-            <label class="form-label">End Date *</label>
-            <input type="date" name="endDate" class="form-control"
-                   required th:min="${todayStr}"/>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Reason</label>
-          <textarea name="reason" class="form-control" rows="3"
-                    placeholder="Briefly describe the reason for your leave..."></textarea>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline" onclick="closeModal('leaveModal')">Cancel</button>
-        <button type="submit" class="btn btn-primary">
-          <i class="ri-send-plane-line"></i> Submit Request
-        </button>
-      </div>
-    </form>
+  <!-- Leave Data for JS -->
+  <div id="leavesData" style="display:none;">
+    <span th:each="l : ${leaves}" class="leave-entry" th:data-start="${l.startDate}" th:data-end="${l.endDate}"
+      th:data-status="${l.status.name()}"></span>
   </div>
-</div>
 
-<script th:src="@{/js/app.js}"></script>
+  <script>
+    function scrollToForm() {
+      const card = document.getElementById('apply-card');
+      if (card) {
+        card.scrollIntoView({ behavior: 'smooth' });
+        card.classList.remove('flash-border');
+        void card.offsetWidth; // Force browser layout reflow
+        card.classList.add('flash-border');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const calDays = document.getElementById('leaveCalendarDays');
+      const monthYearLabel = document.getElementById('calendarMonthYear');
+      const formStart = document.getElementById('formStartDate');
+      const formEnd = document.getElementById('formEndDate');
+      const applyBtn = document.getElementById('applyLeaveBtn');
+
+      if (!calDays) return;
+
+      let currentDate = new Date();
+      let selectedStart = null;
+      let selectedEnd = null;
+
+      // Helper to parse YYYY-MM-DD date string in local timezone
+      function parseLocalDate(dateStr) {
+        if (!dateStr) return null;
+        const parts = dateStr.split('-');
+        if (parts.length !== 3) return new Date(dateStr);
+        return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+      }
+
+      // Extract existing leaves
+      const existingLeaves = [];
+      document.querySelectorAll('.leave-entry').forEach(el => {
+        existingLeaves.push({
+          start: parseLocalDate(el.getAttribute('data-start')),
+          end: parseLocalDate(el.getAttribute('data-end')),
+          status: el.getAttribute('data-status')
+        });
+      });
+
+      function renderCalendar() {
+        calDays.innerHTML = '';
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+
+        const actualToday = new Date();
+        
+        const prevBtn = document.getElementById('prevMonthBtn');
+        prevBtn.disabled = false;
+        prevBtn.classList.remove('disabled');
+
+        monthYearLabel.textContent = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(currentDate);
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        // Empty cells for previous month
+        for (let i = 0; i < firstDay; i++) {
+          const cell = document.createElement('div');
+          cell.className = 'calendar-day-cell empty';
+          calDays.appendChild(cell);
+        }
+
+        // Days
+        for (let i = 1; i <= daysInMonth; i++) {
+          const cell = document.createElement('div');
+          const cellDate = new Date(year, month, i);
+          const isWeekend = cellDate.getDay() === 0 || cellDate.getDay() === 6;
+          const isPastMonthDate = year < actualToday.getFullYear() || (year === actualToday.getFullYear() && month < actualToday.getMonth());
+
+          cell.textContent = i;
+          cell.className = 'calendar-day-cell';
+
+          if (isWeekend) {
+            cell.classList.add('weekend');
+          } else if (isPastMonthDate) {
+            cell.classList.add('disabled');
+            cell.style.cursor = 'not-allowed';
+            cell.style.color = 'var(--text3)';
+            cell.style.background = '#f8fafc';
+          } else {
+            // Check if today
+            const today = new Date();
+            if (cellDate.getDate() === today.getDate() &&
+              cellDate.getMonth() === today.getMonth() &&
+              cellDate.getFullYear() === today.getFullYear()) {
+              cell.classList.add('today');
+            }
+          }
+
+          // Check existing leaves
+          let hasLeave = false;
+          existingLeaves.forEach(l => {
+            if (cellDate >= l.start && cellDate <= l.end) {
+              if (l.status === 'APPROVED') {
+                hasLeave = true;
+                cell.classList.add('has-leave-approved');
+              } else if (l.status === 'PENDING') {
+                hasLeave = true;
+                cell.classList.add('has-leave-pending');
+              } else if (l.status === 'REJECTED') {
+                cell.classList.add('has-leave-rejected');
+              }
+            }
+          });
+
+          // Highlight selection
+          if (selectedStart) {
+            let st = new Date(selectedStart);
+            let en = selectedEnd ? new Date(selectedEnd) : st;
+            if (st > en) { const temp = st; st = en; en = temp; }
+
+            if (cellDate >= st && cellDate <= en && !isWeekend) {
+              if (st.getTime() === en.getTime()) {
+                cell.classList.add('selected-day');
+              } else if (cellDate.getTime() === st.getTime()) {
+                cell.classList.add('selected-range-start');
+              } else if (cellDate.getTime() === en.getTime()) {
+                cell.classList.add('selected-range-end');
+              } else {
+                cell.classList.add('selected-range-mid');
+              }
+            }
+          }
+
+          if (!isWeekend && !hasLeave && !isPastMonthDate) {
+            cell.addEventListener('click', () => {
+              if (!selectedStart || (selectedStart && selectedEnd)) {
+                selectedStart = new Date(year, month, i);
+                selectedEnd = null;
+              } else {
+                selectedEnd = new Date(year, month, i);
+                if (selectedStart > selectedEnd) {
+                  const t = selectedStart; selectedStart = selectedEnd; selectedEnd = t;
+                }
+              }
+
+              updateSelection();
+              renderCalendar();
+            });
+          }
+
+          calDays.appendChild(cell);
+        }
+      }
+
+      function updateSelection() {
+        if (!selectedStart) {
+          document.getElementById('datesChipPlaceholder').style.display = 'flex';
+          document.getElementById('datesChipsWrapper').style.display = 'none';
+          document.getElementById('workingDaysBadge').style.display = 'none';
+          applyBtn.disabled = true;
+          formStart.value = '';
+          formEnd.value = '';
+          return;
+        }
+
+        let st = selectedStart;
+        let en = selectedEnd || selectedStart;
+
+        const fmt = new Intl.DateTimeFormat('en-CA'); // YYYY-MM-DD
+        const startStr = fmt.format(st);
+        const endStr = fmt.format(en);
+
+        formStart.value = startStr;
+        formEnd.value = endStr;
+
+        document.getElementById('displayStartDate').textContent = startStr;
+        document.getElementById('displayEndDate').textContent = endStr;
+        document.getElementById('datesChipPlaceholder').style.display = 'none';
+        document.getElementById('datesChipsWrapper').style.display = 'flex';
+
+        // Calculate working days (excluding weekends)
+        let workingDays = 0;
+        let tempDate = new Date(st);
+        const endTemp = new Date(en);
+        while (tempDate <= endTemp) {
+          const day = tempDate.getDay();
+          if (day !== 0 && day !== 6) {
+            workingDays++;
+          }
+          tempDate.setDate(tempDate.getDate() + 1);
+        }
+
+        const countSpan = document.getElementById('workingDaysCount');
+        countSpan.textContent = workingDays === 1 ? '1 working day' : `${workingDays} working days`;
+        document.getElementById('workingDaysBadge').style.display = 'inline-flex';
+
+        applyBtn.disabled = false;
+      }
+
+      document.getElementById('prevMonthBtn').addEventListener('click', (e) => {
+        if (e.currentTarget.disabled) return;
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        renderCalendar();
+      });
+
+      document.getElementById('nextMonthBtn').addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        renderCalendar();
+      });
+
+      renderCalendar();
+    });
+  </script>
+  <script th:src="@{/js/app.js}"></script>
 </body>
+
 </html>

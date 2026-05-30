@@ -8,53 +8,471 @@
   <link rel="stylesheet" th:href="@{/css/style.css}" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* Custom Scoped Styles for Redesigned Login Page */
+    body {
+      background-color: #f8fafc;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .login-split-container {
+      display: flex;
+      height: 100vh;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    /* Left Column: Branding and Graphic */
+    .login-branding-panel {
+      flex: 1.1;
+      background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #06b6d4 100%);
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 3rem;
+      position: relative;
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    .branding-content {
+      max-width: 520px;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      justify-content: center;
+    }
+
+    .branding-logo-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 1.5rem;
+    }
+
+    .branding-logo-group i {
+      background: rgba(255, 255, 255, 0.15);
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .branding-content h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 1rem;
+      letter-spacing: -0.5px;
+    }
+
+    .branding-content p {
+      font-size: 0.95rem;
+      opacity: 0.85;
+      line-height: 1.5;
+      margin-bottom: 2rem;
+    }
+
+    .branding-vector-image {
+      width: 100%;
+      max-width: 500px;
+      max-height: 48vh;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      filter: drop-shadow(0 20px 25px rgba(0, 0, 0, 0.2));
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* Right Column: Form */
+    .login-form-panel {
+      flex: 0.9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f8fafc;
+      padding: 2rem;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .login-form-box {
+      width: 100%;
+      max-width: 420px;
+      background: #ffffff;
+      padding: 2.25rem;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    }
+
+    .mobile-logo-header {
+      display: none;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .mobile-logo-header i {
+      width: 48px;
+      height: 48px;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .mobile-logo-header h2 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+
+    .form-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+
+    .form-subtitle {
+      font-size: 0.875rem;
+      color: var(--text3);
+      margin-bottom: 1.5rem;
+    }
+
+    /* Icons Inside Input */
+    .input-group-custom {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-group-custom i.input-icon {
+      position: absolute;
+      left: 1rem;
+      color: var(--text3);
+      font-size: 1.1rem;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .input-group-custom .form-control {
+      padding-left: 2.75rem;
+      padding-right: 2.75rem;
+      height: 48px;
+    }
+
+    /* Eye toggle */
+    .password-toggle-btn {
+      position: absolute;
+      right: 0.75rem;
+      background: none;
+      border: none;
+      color: var(--text3);
+      cursor: pointer;
+      padding: 0.5rem;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.15s ease;
+      z-index: 10;
+    }
+
+    .password-toggle-btn:hover {
+      color: var(--text2);
+      background-color: var(--surface2);
+    }
+
+    /* Collapsible Demo Drawer */
+    .demo-drawer {
+      margin-top: 1.25rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #f8fafc;
+      transition: all 0.25s ease;
+    }
+
+    .demo-drawer-header {
+      padding: 0.75rem 1rem;
+      background: #f1f5f9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text2);
+      user-select: none;
+      transition: background-color 0.15s ease;
+    }
+
+    .demo-drawer-header:hover {
+      background: #e2e8f0;
+    }
+
+    .demo-drawer-header i {
+      font-size: 1rem;
+      transition: transform 0.25s ease;
+    }
+
+    .demo-drawer-header.open i {
+      transform: rotate(180deg);
+    }
+
+    .demo-drawer-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.25s ease-out, padding 0.25s ease;
+      padding: 0 1rem;
+      font-size: 0.78rem;
+      color: #64748b;
+    }
+
+    .demo-drawer-body.open {
+      max-height: 200px;
+      padding: 1rem;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .demo-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.5rem;
+      background: #ffffff;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .demo-item span.role-tag {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0.15rem 0.4rem;
+      border-radius: 20px;
+    }
+
+    .demo-item span.role-tag.hr {
+      background: #fce7f3;
+      color: #9d174d;
+    }
+
+    .demo-item span.role-tag.emp {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .demo-copy-btn {
+      background: none;
+      border: none;
+      color: var(--primary-light);
+      cursor: pointer;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      padding: 0.25rem;
+      border-radius: 4px;
+      transition: background-color 0.15s ease;
+    }
+
+    .demo-copy-btn:hover {
+      background: #eff6ff;
+    }
+
+    /* Responsive styling */
+    @media (max-width: 992px) {
+      .login-branding-panel {
+        padding: 2.5rem;
+      }
+      .branding-content h2 {
+        font-size: 1.85rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .login-branding-panel {
+        display: none;
+      }
+      .login-form-panel {
+        flex: 1;
+        padding: 1.5rem;
+      }
+      .login-form-box {
+        border: none;
+        box-shadow: none;
+        padding: 1rem 0.5rem;
+      }
+      .mobile-logo-header {
+        display: block;
+      }
+    }
+  </style>
 </head>
 
 <body>
-  <div class="auth-wrap">
-    <div class="auth-card">
-      <div class="auth-brand">
-        <div class="auth-brand-icon"><i class="ri-team-fill"></i></div>
-        <h1>PeopleInfo</h1>
-        <p>Employee Management System</p>
-      </div>
-
-      <div th:if="${error}" class="alert alert-danger">
-        <i class="ri-error-warning-line"></i> <span th:text="${error}"></span>
-      </div>
-      <div th:if="${message}" class="alert alert-success">
-        <i class="ri-checkbox-circle-line"></i> <span th:text="${message}"></span>
-      </div>
-      <div th:if="${success}" class="alert alert-success">
-        <i class="ri-checkbox-circle-line"></i> <span th:text="${success}"></span>
-      </div>
-
-      <form method="POST" th:action="@{/login}">
-        <div class="form-group">
-          <label class="form-label">Email Address</label>
-          <input type="email" name="email" class="form-control" placeholder="you@company.com" required autofocus />
+  <div class="login-split-container">
+    
+    <!-- Left Column: Branding and Graphic Illustration -->
+    <div class="login-branding-panel">
+      <div class="branding-content">
+        <div class="branding-logo-group">
+          <i class="ri-team-fill"></i>
+          <span>PeopleInfo</span>
         </div>
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <input type="password" name="password" class="form-control" placeholder="Enter your password" required />
+        <h2>Empower Your Team, Simplify Your Workflow.</h2>
+        <p>A comprehensive Employee Management platform. Seamlessly manage leave requests, organization directories, and performance tracking in one unified place.</p>
+        
+        <!-- Generated Workspace Illustration -->
+        <img th:src="@{/images/login_illustration.png}" alt="Workspace Illustration" class="branding-vector-image" />
+      </div>
+    </div>
+
+    <!-- Right Column: Form -->
+    <div class="login-form-panel">
+      <div class="login-form-box">
+        
+        <!-- Mobile Logo Header -->
+        <div class="mobile-logo-header">
+          <i class="ri-team-fill"></i>
+          <h2>PeopleInfo</h2>
         </div>
-        <button type="submit" class="btn btn-primary w-100" style="justify-content:center;padding:.75rem;">
-          <i class="ri-login-circle-line"></i> Sign In
-        </button>
-      </form>
 
-      <!-- <div class="auth-footer">
-        Don't have an account? <a th:href="@{/register}">Create one</a>
-      </div> -->
+        <div class="form-title">Welcome Back</div>
+        <div class="form-subtitle">Please enter your credentials to access your account</div>
 
-      <!-- Demo credentials hint -->
-      <!-- <div style="margin-top:1.5rem;background:#f8fafc;border-radius:8px;padding:1rem;font-size:.78rem;color:#64748b;">
-      <strong style="display:block;margin-bottom:.5rem;color:#475569;">Demo Credentials</strong>
-      <div><strong>HR:</strong> hr@peopleinfo.com / hr123</div>
-      <div style="margin-top:.25rem;"><strong>Employee:</strong> michael.chen@peopleinfo.com / emp123</div>
-    </div> -->
+        <div th:if="${error}" class="alert alert-danger">
+          <i class="ri-error-warning-line"></i> <span th:text="${error}"></span>
+        </div>
+        <div th:if="${message}" class="alert alert-success">
+          <i class="ri-checkbox-circle-line"></i> <span th:text="${message}"></span>
+        </div>
+        <div th:if="${success}" class="alert alert-success">
+          <i class="ri-checkbox-circle-line"></i> <span th:text="${success}"></span>
+        </div>
+
+        <form method="POST" th:action="@{/login}">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <div class="input-group-custom">
+              <i class="ri-mail-line input-icon"></i>
+              <input type="email" name="email" id="emailInput" class="form-control" placeholder="you@company.com" required autofocus />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="input-group-custom">
+              <i class="ri-lock-2-line input-icon"></i>
+              <input type="password" name="password" id="passwordInput" class="form-control" placeholder="Enter your password" required />
+              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility()">
+                <i class="ri-eye-line" id="passwordToggleIcon"></i>
+              </button>
+            </div>
+          </div>
+          <div class="form-group" style="display:flex; align-items:center; gap:0.5rem; margin-top: 0.5rem; margin-bottom: 1rem;">
+            <input type="checkbox" name="remember-me" id="rememberMeInput" style="width:16px; height:16px; cursor:pointer;" />
+            <label for="rememberMeInput" style="font-size:0.85rem; color:var(--text2); cursor:pointer; user-select:none;">Remember me on this computer</label>
+          </div>
+          <button type="submit" class="btn btn-primary w-100" style="justify-content:center;padding:.75rem;height:48px;font-size:0.95rem;margin-top:0.5rem;">
+            <i class="ri-login-circle-line"></i> Sign In
+          </button>
+        </form>
+
+        <!-- Demo Credentials Drawer -->
+<!--        <div class="demo-drawer">-->
+<!--          <div class="demo-drawer-header" id="demoDrawerHeader" onclick="toggleDemoDrawer()">-->
+<!--            <span>Quick Demo Credentials</span>-->
+<!--            <i class="ri-arrow-down-s-line"></i>-->
+<!--          </div>-->
+<!--          <div class="demo-drawer-body" id="demoDrawerBody">-->
+<!--            <div class="demo-item">-->
+<!--              <div>-->
+<!--                <span class="role-tag hr">HR Manager</span>-->
+<!--                <div style="margin-top:0.25rem;font-weight:600;">hr@peopleinfo.com</div>-->
+<!--              </div>-->
+<!--              <button type="button" class="demo-copy-btn" onclick="applyDemoCredentials('hr@peopleinfo.com', 'hr123')" title="Auto-fill Credentials">-->
+<!--                <i class="ri-file-copy-line"></i> Use-->
+<!--              </button>-->
+<!--            </div>-->
+<!--            <div class="demo-item">-->
+<!--              <div>-->
+<!--                <span class="role-tag emp">Employee</span>-->
+<!--                <div style="margin-top:0.25rem;font-weight:600;">michael.chen@peopleinfo.com</div>-->
+<!--              </div>-->
+<!--              <button type="button" class="demo-copy-btn" onclick="applyDemoCredentials('michael.chen@peopleinfo.com', 'emp123')" title="Auto-fill Credentials">-->
+<!--                <i class="ri-file-copy-line"></i> Use-->
+<!--              </button>-->
+<!--            </div>-->
+<!--          </div>-->
+        </div>
+
+      </div>
     </div>
   </div>
+
+  <script>
+    function togglePasswordVisibility() {
+      const passwordInput = document.getElementById('passwordInput');
+      const toggleIcon = document.getElementById('passwordToggleIcon');
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.className = 'ri-eye-off-line';
+      } else {
+        passwordInput.type = 'password';
+        toggleIcon.className = 'ri-eye-line';
+      }
+    }
+
+    function toggleDemoDrawer() {
+      const header = document.getElementById('demoDrawerHeader');
+      const body = document.getElementById('demoDrawerBody');
+      header.classList.toggle('open');
+      body.classList.toggle('open');
+    }
+
+    function applyDemoCredentials(email, password) {
+      document.getElementById('emailInput').value = email;
+      document.getElementById('passwordInput').value = password;
+      
+      // Flash input borders to indicate they've been auto-filled
+      const emailGroup = document.getElementById('emailInput');
+      const passGroup = document.getElementById('passwordInput');
+      emailGroup.style.transition = 'border-color 0.15s ease';
+      passGroup.style.transition = 'border-color 0.15s ease';
+      emailGroup.style.borderColor = 'var(--success)';
+      passGroup.style.borderColor = 'var(--success)';
+      setTimeout(() => {
+        emailGroup.style.borderColor = '';
+        passGroup.style.borderColor = '';
+      }, 800);
+    }
+  </script>
   <script th:src="@{/js/app.js}"></script>
 </body>
 

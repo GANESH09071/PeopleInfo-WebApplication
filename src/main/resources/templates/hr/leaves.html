@@ -48,7 +48,10 @@
                     <div class="user-avatar-sm" style="width:32px;height:32px;font-size:.75rem;"
                          th:text="${leave.employee.firstName.substring(0,1)} + ${leave.employee.lastName.substring(0,1)}"></div>
                     <div>
-                      <div style="font-weight:600;font-size:.875rem;" th:text="${leave.employee.fullName}"></div>
+                      <div style="display:flex;align-items:center;gap:.4rem;">
+                        <div style="font-weight:600;font-size:.875rem;" th:text="${leave.employee.fullName}"></div>
+                        <span class="badge badge-danger" style="font-size:.65rem;padding:.1rem .35rem;" th:if="${leave.isUrgent}"><i class="ri-alert-line"></i> Urgent</span>
+                      </div>
                       <div class="text-sm text-muted" th:text="${leave.employee.department}"></div>
                     </div>
                   </div>

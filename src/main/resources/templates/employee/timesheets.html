@@ -59,7 +59,7 @@
           <div class="stat-icon blue"><i class="ri-time-line"></i></div>
           <div class="stat-info">
             <div class="label">This Month</div>
-            <div class="value" th:text="${hoursThisMonth} + 'h'">0h</div>
+            <div class="value" th:text="${hoursThisMonth != null ? #numbers.formatDecimal(hoursThisMonth, 1, 1) : '0.0'} + 'h'">0h</div>
             <div class="change">Total hours logged</div>
           </div>
         </div>
@@ -85,7 +85,7 @@
                 <td th:text="${ts.checkIn}"></td>
                 <td th:text="${ts.checkOut}"></td>
                 <td><span style="font-weight:700;color:var(--primary);font-size:1rem;"
-                          th:text="${ts.hoursWorked} + 'h'"></span></td>
+                          th:text="${ts.hoursWorked != null ? #numbers.formatDecimal(ts.hoursWorked, 1, 1) : '0.0'} + 'h'"></span></td>
                 <td class="text-sm" th:text="${ts.projectName} ?: '—'"></td>
                 <td class="text-sm text-muted"
                     style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"

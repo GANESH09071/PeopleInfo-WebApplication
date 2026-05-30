@@ -44,6 +44,24 @@ public class LeaveRequest {
 
     @Column(name = "hr_comments")
     private String hrComments;
+    @Column(name = "is_urgent", nullable = false)
+    @Builder.Default
+    private Boolean isUrgent = false;
+    public boolean isUrgent() {
+        return isUrgent != null && isUrgent;
+    }
+
+    public boolean getIsUrgent() {
+        return isUrgent != null && isUrgent;
+    }
+
+    public void setUrgent(boolean urgent) {
+        this.isUrgent = urgent;
+    }
+
+    public void setIsUrgent(Boolean urgent) {
+        this.isUrgent = urgent;
+    }
 
     @Column(name = "applied_on")
     private LocalDateTime appliedOn;
@@ -71,7 +89,7 @@ public class LeaveRequest {
     }
 
     public enum LeaveType {
-        ANNUAL, SICK, MATERNITY, PATERNITY, CASUAL, UNPAID, EMERGENCY
+        SICK, EARNED, CASUAL, FLEXI
     }
 
     public enum LeaveStatus {

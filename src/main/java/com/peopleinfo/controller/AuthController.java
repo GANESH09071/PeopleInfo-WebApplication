@@ -19,6 +19,11 @@ public class AuthController {
 
     @GetMapping("/")
     public String home() {
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !(auth instanceof org.springframework.security.authentication.AnonymousAuthenticationToken)) {
+            String role = auth.getAuthorities().iterator().next().getAuthority();
+            return role.equals("ROLE_HR") ? "redirect:/hr/dashboard" : "redirect:/employee/dashboard";
+        }
         return "redirect:/login";
     }
 
@@ -26,6 +31,12 @@ public class AuthController {
     public String loginPage(@RequestParam(required = false) String error,
                             @RequestParam(required = false) String logout,
                             Model model) {
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !(auth instanceof org.springframework.security.authentication.AnonymousAuthenticationToken)) {
+            String role = auth.getAuthorities().iterator().next().getAuthority();
+            return role.equals("ROLE_HR") ? "redirect:/hr/dashboard" : "redirect:/employee/dashboard";
+        }
+
         if (error != null) model.addAttribute("error", "Invalid email or password.");
         if (logout != null) model.addAttribute("message", "You have been logged out.");
         return "auth/login";

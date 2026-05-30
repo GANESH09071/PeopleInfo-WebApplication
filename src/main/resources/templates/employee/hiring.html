@@ -64,7 +64,7 @@
                     Requirements
                   </h4>
                   <ul style="padding-left:1.25rem;color:var(--text2);font-size:.875rem;line-height:2;">
-                    <li th:each="req : ${#strings.arraySplit(job.requirements, '\n')}"
+                    <li th:each="req : ${job.requirements.split('\n')}"
                         th:if="${!#strings.isEmpty(#strings.trim(req))}"
                         th:text="${#strings.trim(req)}"></li>
                   </ul>
@@ -76,7 +76,7 @@
                     Responsibilities
                   </h4>
                   <ul style="padding-left:1.25rem;color:var(--text2);font-size:.875rem;line-height:2;">
-                    <li th:each="res : ${#strings.arraySplit(job.responsibilities, '\n')}"
+                    <li th:each="res : ${job.responsibilities.split('\n')}"
                         th:if="${!#strings.isEmpty(#strings.trim(res))}"
                         th:text="${#strings.trim(res)}"></li>
                   </ul>

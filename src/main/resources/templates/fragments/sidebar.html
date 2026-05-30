@@ -65,8 +65,10 @@
 
   <nav class="sidebar-nav">
     <span class="nav-section">Main</span>
-    <a th:href="@{/employee/dashboard}" class="nav-link">
-      <i class="ri-dashboard-line"></i> Dashboard
+    <a href="#" class="nav-link" onclick="openModal('notificationsModal')">
+      <i class="ri-notification-3-line"></i> Notifications
+      <span class="nav-badge" th:if="${unreadNotificationCount != null and unreadNotificationCount > 0}"
+            th:text="${unreadNotificationCount}"></span>
     </a>
 
     <span class="nav-section">My Work</span>
@@ -99,6 +101,49 @@
     <a th:href="@{/logout}" class="logout-btn">
       <i class="ri-logout-box-line"></i> Sign Out
     </a>
+  </div>
+
+  <!-- Notifications Modal -->
+  <div class="modal-overlay" id="notificationsModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">
+          <i class="ri-notification-3-line"></i> Notifications
+        </span>
+        <button class="btn btn-outline btn-sm btn-icon" onclick="closeModal('notificationsModal')">
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+      <div class="modal-body" style="max-height: 400px; overflow-y: auto;">
+        <div th:if="${#lists.isEmpty(notifications)}" class="empty-state" style="padding: 2rem;">
+          <i class="ri-check-double-line"></i>
+          <p>You have no notifications.</p>
+        </div>
+        <div th:unless="${#lists.isEmpty(notifications)}" class="notification-list">
+          <div th:each="n : ${notifications}" 
+               class="notification-item"
+               th:classappend="${!n.isRead ? 'unread' : ''}">
+            <div class="notification-icon">
+              <i class="ri-notification-badge-line"></i>
+            </div>
+            <div class="notification-content">
+              <div class="notification-msg" th:text="${n.message}"></div>
+              <div class="notification-time">
+                <i class="ri-time-line"></i>
+                <span th:text="${#temporals.format(n.createdAt, 'MMM dd, yyyy HH:mm')}"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" th:unless="${#lists.isEmpty(notifications)}">
+        <form th:action="@{/employee/notifications/read}" method="POST" style="margin: 0; width: 100%;">
+          <button type="submit" class="btn btn-primary w-100" onclick="closeModal('notificationsModal')">
+            <i class="ri-check-double-line"></i> Mark All as Read
+          </button>
+        </form>
+      </div>
+    </div>
   </div>
 </div>
 
